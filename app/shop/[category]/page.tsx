@@ -33,8 +33,8 @@ export default async function CategoryPage({
 
   const meta = CATEGORY_META[category];
 
-  // Get products — 'all' fetches everything, others filter by gender
-  let products = getProductsByCategory(category === 'all' ? 'all' : category);
+  // 1. Added 'await' to the main product fetch
+  let products = await getProductsByCategory(category === 'all' ? 'all' : category);
 
   // Apply filter
   if (filter === 'new')        products = products.filter(p => p.isNew);
@@ -46,10 +46,10 @@ export default async function CategoryPage({
   if (sort === 'price-desc') products = [...products].sort((a, b) => b.price - a.price);
   if (sort === 'newest')     products = [...products].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  // Counts for tabs
-  const allCount    = getProductsByCategory('all').length;
-  const menCount    = getProductsByCategory('men').length;
-  const womenCount  = getProductsByCategory('women').length;
+  // 2. Added 'await' to all three tab counters
+  const allCount   = (await getProductsByCategory('all')).length;
+  const menCount   = (await getProductsByCategory('men')).length;
+  const womenCount = (await getProductsByCategory('women')).length;
 
   return (
     <div style={{ paddingTop: '5rem', minHeight: '100vh', background: '#0a0a0a' }}>

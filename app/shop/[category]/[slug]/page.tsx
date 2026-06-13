@@ -6,7 +6,10 @@ import type { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ category: string; slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  
+  // 1. Added 'await' here
+  const product = await getProductBySlug(slug);
+  
   if (!product) return { title: 'Not Found' };
   return {
     title: `${product.name} — Oversized T-Shirt | ChillOver`,
@@ -16,13 +19,19 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
 
 export default async function ProductPage({ params }: { params: Promise<{ category: string; slug: string }> }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  
+  // 2. Added 'await' here
+  const product = await getProductBySlug(slug);
+  
   if (!product) notFound();
 
   // Serialize cleanly — strip any non-plain values so RSC→Client prop passing is safe
   const serialized = JSON.parse(JSON.stringify(product));
 
-  const related = getProductsByCategory(product.category)
+  // 3. Added 'await' here before running the filters
+  const relatedProducts = await getProductsByCategory(product.category);
+  
+  const related = relatedProducts
     .filter(p => p.id !== product.id)
     .slice(0, 4)
     .map(p => JSON.parse(JSON.stringify(p)));
