@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { getProducts } from '@/lib/products';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = { title: 'Admin Dashboard | ChillOver' };
 
 // 1. Added 'async' here

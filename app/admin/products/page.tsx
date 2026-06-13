@@ -3,6 +3,8 @@ import { getProducts } from '@/lib/products';
 import AdminProductActions from '@/components/admin/AdminProductActions';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = { title: 'Products | ChillOver Admin' };
 
 // 1. Added 'async' here
