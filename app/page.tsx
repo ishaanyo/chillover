@@ -5,10 +5,14 @@ import ProductCard from '@/components/product/ProductCard';
 import HeroTicker from '@/components/home/HeroTicker';
 import HeroTShirtSlider from '@/components/home/HeroTShirtSlider';
 
-export default function HomePage() {
-  const products = getProducts();
+// 1. Added 'async' here
+export default async function HomePage() {
+  // 2. Added 'await' here
+  const products = await getProducts();
+  
   const featured = products.filter(p => p.isFeatured).slice(0, 4);
   const newArrivals = products.filter(p => p.isNew).slice(0, 4);
+  
   return (
     <div>
       {/* HERO */}

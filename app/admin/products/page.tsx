@@ -5,8 +5,10 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Products | ChillOver Admin' };
 
-export default function AdminProductsPage() {
-  const products = getProducts();
+// 1. Added 'async' here
+export default async function AdminProductsPage() {
+  // 2. Added 'await' here
+  const products = await getProducts();
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1100px', margin: '0 auto' }}>

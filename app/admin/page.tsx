@@ -4,8 +4,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Admin Dashboard | ChillOver' };
 
-export default function AdminPage() {
-  const products = getProducts();
+// 1. Added 'async' here
+export default async function AdminPage() {
+  // 2. Added 'await' here
+  const products = await getProducts();
+  
   const totalValue = products.reduce((s, p) => s + p.price, 0);
   const menCount = products.filter(p => p.category === 'men').length;
   const womenCount = products.filter(p => p.category === 'women').length;

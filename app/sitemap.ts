@@ -1,8 +1,11 @@
 import { MetadataRoute } from 'next';
 import { getProducts } from '@/lib/products';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const products = getProducts();
+// 1. Added 'async' and 'Promise' return type
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // 2. Added 'await' here so it waits for the database!
+  const products = await getProducts();
+  
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://chillover.in';
 
   const productUrls = products.map(p => ({
