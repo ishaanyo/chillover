@@ -3,15 +3,21 @@ import { getProductById } from '@/lib/products';
 import ProductForm from '@/components/admin/ProductForm';
 import type { Metadata } from 'next';
 
+// 1. Disable caching so you always see the latest edits
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const product = getProductById(id);
+  // 2. Added 'await' here
+  const product = await getProductById(id);
   return { title: product ? `Edit ${product.name} | ChillOver Admin` : 'Product Not Found' };
 }
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const product = getProductById(id);
+  // 3. Added 'await' here
+  const product = await getProductById(id);
+  
   if (!product) notFound();
 
   return (
