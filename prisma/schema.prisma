@@ -45,3 +45,19 @@ model Variant {
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
+
+// Add an Enum for roles
+enum Role {
+  USER
+  ADMIN
+}
+
+// Add the User model
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String    // We will hash this!
+  role          Role      @default(USER) // Defaults to normal customer
+  createdAt     DateTime  @default(now())
+}
