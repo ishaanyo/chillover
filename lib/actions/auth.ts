@@ -9,7 +9,15 @@ import { redirect } from 'next/navigation';
 // 1. Handle Login
 export async function loginAction(formData: FormData) {
   try {
-    // This connects directly to the auth.ts file we made earlier
+    const email = formData.get('email') as string;
+    
+    // Check the user's role in the database to determine where they should go
+    const user = await prisma.user.findUnique({ where: { email } });
+    const redirectUrl = user?.role === 'ADMIN' ? '/admin' : '/';
+
+    // Tell NextAuth where to send the user after a successful login
+    formData.append('redirectTo', redirectUrl);
+
     await signIn('credentials', formData);
   } catch (error) {
     if (error instanceof AuthError) {
@@ -20,7 +28,7 @@ export async function loginAction(formData: FormData) {
           return { error: 'Something went wrong.' };
       }
     }
-    throw error; // NextAuth needs this throw to perform its redirects!
+    throw error; 
   }
 }
 
