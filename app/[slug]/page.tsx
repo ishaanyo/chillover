@@ -4,49 +4,55 @@ import ProductCard from '@/components/product/ProductCard';
 import CategoryFilters from '@/components/product/CategoryFilters';
 import type { Metadata } from 'next';
 
+const MAIN_CATEGORIES = ['men', 'women', 'all'];
+
 const CATEGORY_META: Record<string, { title: string; desc: string; heading: string; sub: string }> = {
   men:    { title: "Men's Oversized T-Shirts | ChillOver", desc: "Shop men's premium oversized t-shirts. Bold prints, 240 GSM cotton, boxy fits. Free shipping above ₹999.", heading: "Men's Collection", sub: "Boxy fits · Drop shoulder · S to 3XL" },
   women:  { title: "Women's Oversized T-Shirts | ChillOver", desc: "Shop women's premium oversized t-shirts. Drop-shoulder fits, bold graphics. Free shipping above ₹999.", heading: "Women's Collection", sub: "Drop shoulder · Relaxed fits · XS to 2XL" },
   all:    { title: "Shop All Oversized T-Shirts | ChillOver", desc: "Browse the full ChillOver collection of premium oversized printed t-shirts.", heading: "All Products", sub: "Every drop, every fit — in one place" },
 };
 
-const VALID = ['men', 'women', 'all'];
-
-export async function generateMetadata({ params }: { params: Promise<{ category: string }> }): Promise<Metadata> {
-  const { category } = await params;
-  const meta = CATEGORY_META[category];
-  if (!meta) return { title: 'Not Found' };
-  return { title: meta.title, description: meta.desc };
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const meta = CATEGORY_META[slug];
+  if (meta) return { title: meta.title, description: meta.desc };
+  // subcategory
+  return { title: `${slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ')} | ChillOver` };
 }
 
-export default async function CategoryPage({
+export default async function SlugPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ category: string }>;
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{ filter?: string; sort?: string }>;
 }) {
-  const { category } = await params;
+  const { slug } = await params;
   const { filter, sort } = await searchParams;
 
-  if (!VALID.includes(category)) notFound();
+  const isMain = MAIN_CATEGORIES.includes(slug);
 
-  const meta = CATEGORY_META[category];
+  // Fetch products — for main categories use existing logic, for subcategories filter by category field or tags
+  let products = await getProductsByCategory(slug === 'all' ? 'all' : slug);
 
-  // 1. Added 'await' to the main product fetch
-  let products = await getProductsByCategory(category === 'all' ? 'all' : category);
+  // If not a known main category and no products found, 404
+  if (!isMain && products.length === 0) notFound();
+
+  const meta = CATEGORY_META[slug] ?? {
+    heading: slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' '),
+    sub: `${products.length} products`,
+  };
 
   // Apply filter
   if (filter === 'new')        products = products.filter(p => p.isNew);
   if (filter === 'bestseller') products = products.filter(p => p.isBestseller);
-  if (filter === 'sale')       products = products.filter(p => p.price < p.originalPrice);
+  if (filter === 'sale')       products = products.filter(p => p.price < (p.originalPrice ?? p.price));
 
   // Apply sort
   if (sort === 'price-asc')  products = [...products].sort((a, b) => a.price - b.price);
   if (sort === 'price-desc') products = [...products].sort((a, b) => b.price - a.price);
   if (sort === 'newest')     products = [...products].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  // 2. Added 'await' to all three tab counters
   const allCount   = (await getProductsByCategory('all')).length;
   const menCount   = (await getProductsByCategory('men')).length;
   const womenCount = (await getProductsByCategory('women')).length;
@@ -72,17 +78,17 @@ export default async function CategoryPage({
 
           {/* Category tabs */}
           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
-            {([['all', 'All', allCount], ['men', 'Men', menCount], ['women', 'Women', womenCount]] as const).map(([slug, label, count]) => (
+            {([['all', 'All', allCount], ['men', 'Men', menCount], ['women', 'Women', womenCount]] as const).map(([tabSlug, label, count]) => (
               <a
-                key={slug}
-                href={`/shop/${slug}`}
+                key={tabSlug}
+                href={`/${tabSlug}`}
                 style={{
                   fontFamily: 'Space Mono, monospace', fontSize: '0.6rem',
                   letterSpacing: '0.12em', textTransform: 'uppercase',
                   padding: '0.4rem 1rem', textDecoration: 'none',
-                  background: category === slug ? '#ff3c1e' : 'transparent',
-                  color: category === slug ? '#fff' : '#888',
-                  border: `1px solid ${category === slug ? '#ff3c1e' : 'rgba(245,242,237,0.15)'}`,
+                  background: slug === tabSlug ? '#ff3c1e' : 'transparent',
+                  color: slug === tabSlug ? '#fff' : '#888',
+                  border: `1px solid ${slug === tabSlug ? '#ff3c1e' : 'rgba(245,242,237,0.15)'}`,
                   transition: 'all 0.2s',
                 }}
               >
@@ -96,7 +102,7 @@ export default async function CategoryPage({
       {/* Filters + Grid */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 2.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-          <CategoryFilters currentFilter={filter} currentSort={sort} category={category} />
+          <CategoryFilters currentFilter={filter} currentSort={sort} category={slug} />
           <p style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888' }}>
             {products.length} Product{products.length !== 1 ? 's' : ''}
           </p>
@@ -106,7 +112,7 @@ export default async function CategoryPage({
           <div style={{ textAlign: 'center', padding: '6rem 0', color: '#888' }}>
             <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.2 }}>👕</div>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>No products found</p>
-            <a href={`/shop/${category}`} style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#ff3c1e', textDecoration: 'none' }}>
+            <a href={`/${slug}`} style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#ff3c1e', textDecoration: 'none' }}>
               Clear Filters →
             </a>
           </div>

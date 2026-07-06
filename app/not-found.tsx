@@ -11,7 +11,7 @@ export default function NotFound() {
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/" style={{ background: '#ff3c1e', color: '#fff', fontFamily: 'Space Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.9rem 2rem', textDecoration: 'none' }}>Go Home</Link>
-          <Link href="/shop/all" style={{ background: 'transparent', color: '#f5f2ed', fontFamily: 'Space Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.9rem 2rem', border: '1px solid rgba(245,242,237,0.2)', textDecoration: 'none' }}>Shop All</Link>
+          <Link href="/all" style={{ background: 'transparent', color: '#f5f2ed', fontFamily: 'Space Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.9rem 2rem', border: '1px solid rgba(245,242,237,0.2)', textDecoration: 'none' }}>Shop All</Link>
         </div>
       </div>
     </div>

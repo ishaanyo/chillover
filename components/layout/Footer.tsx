@@ -20,7 +20,7 @@ export default function Footer() {
         <div>
           <h4 style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#ff3c1e', marginBottom: '1rem' }}>Shop</h4>
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            {[['Men', '/shop/men'], ['Women', '/shop/women'], ['Shop All', '/shop/all'], ['New Arrivals', '/shop/all?filter=new'], ['Bestsellers', '/shop/all?filter=bestseller']].map(([l, h]) => (
+            {[['Men', '/men'], ['Women', '/women'], ['Shop All', '/all'], ['New Arrivals', '/all?filter=new'], ['Bestsellers', '/all?filter=bestseller']].map(([l, h]) => (
               <li key={h}><Link href={h} style={{ fontSize: '0.85rem', color: '#888', textDecoration: 'none', fontWeight: 300 }}>{l}</Link></li>
             ))}
           </ul>

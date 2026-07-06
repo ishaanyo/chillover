@@ -67,7 +67,7 @@ export default async function AdminProductsPage() {
                   <td>
                     <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
                       <Link href={`/admin/products/${p.id}`} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#ff3c1e', textDecoration: 'none' }}>Edit</Link>
-                      <Link href={`/shop/${p.category}/${p.slug}`} target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>View ↗</Link>
+                      <Link href={`/product/${p.slug}`} target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>View ↗</Link>
                       <AdminProductActions productId={p.id} productName={p.name} />
                     </div>
                   </td>

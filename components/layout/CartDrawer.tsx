@@ -121,7 +121,7 @@ export default function CartDrawer() {
             state.items.map(item => (
               <div key={`${item.product.id}-${item.size}`} style={{ display: 'flex', gap: '1rem', padding: '1rem 0', borderBottom: '1px solid rgba(245,242,237,0.06)', alignItems: 'flex-start' }}>
                 {/* Product image */}
-                <a href={`/shop/${item.product.category}/${item.product.slug}`} style={{ flexShrink: 0, textDecoration: 'none' }}>
+                <a href={`/product/${item.product.slug}`} style={{ flexShrink: 0, textDecoration: 'none' }}>
                   <div style={{ width: '72px', height: '90px', background: '#111', overflow: 'hidden' }}>
                     {item.product.images?.[0] ? (
                       <img src={item.product.images[0].url} alt={item.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://chillover.in';
 
   const productUrls = products.map(p => ({
-    url: `${baseUrl}/shop/${p.category}/${p.slug}`,
+    url: `${baseUrl}/product/${p.slug}`,
     lastModified: new Date(p.createdAt),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
@@ -17,9 +17,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
-    { url: `${baseUrl}/shop/men`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/shop/women`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/shop/all`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/men`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/women`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/all`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     ...productUrls,
   ];
 }

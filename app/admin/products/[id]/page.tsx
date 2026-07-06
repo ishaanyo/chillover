@@ -26,7 +26,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.4rem' }}>
           <a href="/admin/products" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>← Products</a>
           <span style={{ color: '#444' }}>·</span>
-          <a href={`/shop/${product.category}/${product.slug}`} target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>View on Store ↗</a>
+          <a href={`/product/${product.slug}`} target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>View on Store ↗</a>
         </div>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', lineHeight: 1 }}>Edit Product</h1>
         <p style={{ color: '#888', fontSize: '0.875rem', marginTop: '0.3rem' }}>{product.name} · {product.slug}</p>

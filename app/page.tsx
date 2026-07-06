@@ -26,7 +26,7 @@ export default async function HomePage() {
           <p style={{ fontFamily:'var(--font-mono)',fontSize:'0.65rem',letterSpacing:'0.2em',textTransform:'uppercase',color:'#ff3c1e',marginBottom:'0.5rem' }}>Shop By Category</p>
           <h2 style={{ fontFamily:'var(--font-display)',fontSize:'clamp(2.5rem,5vw,4rem)',letterSpacing:'0.03em',textTransform:'uppercase',marginBottom:'2rem' }}>Find Your Fit</h2>
           <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1.5rem' }}>
-            {[{label:'Men',sub:'Oversized boxy cuts · S to 3XL',href:'/shop/men',color:'#4af',bg:'linear-gradient(135deg,#0a0a14,#0d1520)',emoji:'👕'},{label:'Women',sub:'Drop-shoulder fits · XS to 2XL',href:'/shop/women',color:'#f8a',bg:'linear-gradient(135deg,#14080a,#1a0d10)',emoji:'🌸'}].map(cat=>(
+            {[{label:'Men',sub:'Oversized boxy cuts · S to 3XL',href:'/men',color:'#4af',bg:'linear-gradient(135deg,#0a0a14,#0d1520)',emoji:'👕'},{label:'Women',sub:'Drop-shoulder fits · XS to 2XL',href:'/women',color:'#f8a',bg:'linear-gradient(135deg,#14080a,#1a0d10)',emoji:'🌸'}].map(cat=>(
               <Link key={cat.label} href={cat.href} style={{ textDecoration:'none',position:'relative',overflow:'hidden',minHeight:'340px',display:'flex',alignItems:'flex-end',border:'1px solid rgba(245,242,237,0.07)',background:cat.bg }}>
                 <div style={{ position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10rem',opacity:0.07 }}>{cat.emoji}</div>
                 <div style={{ position:'relative',zIndex:1,padding:'2rem',background:'linear-gradient(to top,rgba(10,10,10,0.92) 0%,transparent 100%)',width:'100%' }}>

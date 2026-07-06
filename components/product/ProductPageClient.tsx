@@ -42,7 +42,7 @@ export default function ProductPageClient({ product }: Props) {
           <nav style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.56rem', letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: '#888', display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' as const }}>
             <a href="/" style={{ color: '#888', textDecoration: 'none' }}>Home</a>
             <span>›</span>
-            <a href={`/shop/${product.category}`} style={{ color: '#888', textDecoration: 'none' }}>
+            <a href={`/${product.category}`} style={{ color: '#888', textDecoration: 'none' }}>
               {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
             </a>
             <span>›</span>
