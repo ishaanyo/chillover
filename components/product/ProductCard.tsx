@@ -32,7 +32,7 @@ export default function ProductCard({ product }: { product: Product }) {
       }}
     >
       {/* Image area */}
-      <Link href={`/shop/${product.category}/${product.slug}`} style={{ display: 'block', overflow: 'hidden' }}>
+      <Link href={`/product/${product.slug}`} style={{ display: 'block', overflow: 'hidden' }}>
         <div style={{ aspectRatio: '3/4', background: '#0f0f0f', position: 'relative', overflow: 'hidden' }}>
           {product.images?.[0] ? (
             <img
@@ -111,7 +111,7 @@ export default function ProductCard({ product }: { product: Product }) {
             ))}
           </div>
         </div>
-        <Link href={`/shop/${product.category}/${product.slug}`} style={{ display: 'block', fontSize: '0.93rem', fontWeight: 500, color: '#f5f2ed', textDecoration: 'none', marginBottom: '0.4rem' }}>
+        <Link href={`/product/${product.slug}`} style={{ display: 'block', fontSize: '0.93rem', fontWeight: 500, color: '#f5f2ed', textDecoration: 'none', marginBottom: '0.4rem' }}>
           {product.name}
         </Link>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>

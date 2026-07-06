@@ -43,9 +43,9 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { label: 'Men', href: '/shop/men' },
-    { label: 'Women', href: '/shop/women' },
-    { label: 'Shop All', href: '/shop/all' },
+    { label: 'Men', href: '/men' },
+    { label: 'Women', href: '/women' },
+    { label: 'Shop All', href: '/all' },
     { label: 'About', href: '/#about' },
   ];
 
@@ -70,7 +70,7 @@ export default function Navbar() {
           {/* Desktop nav links — centred */}
           <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }} className="desktop-nav">
             {navLinks.map(({ label, href }) => {
-              const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
+              const active = pathname === href || (href !== '/' && href !== '/#about' && pathname?.startsWith(href + '/'));
               return (
                 <Link key={href} href={href} style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: active ? '#ff3c1e' : '#e8e2d9', textDecoration: 'none', whiteSpace: 'nowrap', transition: 'color 0.2s' }}>
                   {label}
