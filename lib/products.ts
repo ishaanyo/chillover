@@ -1,12 +1,15 @@
 import { prisma } from './prisma';
 
+const productInclude = {
+  images: { orderBy: { order: 'asc' as const } },
+  variants: true,
+  subcategory: true,
+};
+
 // 1. Get all products with their associated images and variants
 export async function getProducts() {
   return await prisma.product.findMany({
-    include: {
-      images: { orderBy: { order: 'asc' } },
-      variants: true,
-    },
+    include: productInclude,
     orderBy: { createdAt: 'desc' },
   });
 }
@@ -15,10 +18,7 @@ export async function getProducts() {
 export async function getProductById(id: string) {
   return await prisma.product.findUnique({
     where: { id },
-    include: {
-      images: true,
-      variants: true,
-    },
+    include: productInclude,
   });
 }
 
@@ -26,26 +26,26 @@ export async function getProductById(id: string) {
 export async function getProductBySlug(slug: string) {
   return await prisma.product.findUnique({
     where: { slug },
-    include: {
-      images: true,
-      variants: true,
-    },
+    include: productInclude,
   });
 }
 
-// 4. Get products filtered by category
+// 4. Get products filtered by main category (men / women / all)
 export async function getProductsByCategory(category: string) {
+  if (category === 'all') {
+    return await prisma.product.findMany({
+      include: productInclude,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
   return await prisma.product.findMany({
     where: {
       category: {
         equals: category,
-        mode: 'insensitive', // Case-insensitive matching
+        mode: 'insensitive',
       },
     },
-    include: {
-      images: { orderBy: { order: 'asc' } },
-      variants: true,
-    },
+    include: productInclude,
     orderBy: { createdAt: 'desc' },
   });
 }
@@ -53,7 +53,7 @@ export async function getProductsByCategory(category: string) {
 // 5. Create a new product along with variants and images
 export async function createProduct(data: any) {
   const { images, variants, ...productData } = data;
-  
+
   return await prisma.product.create({
     data: {
       ...productData,
@@ -78,9 +78,7 @@ export async function createProduct(data: any) {
 export async function updateProduct(id: string, data: any) {
   const { images, variants, ...productData } = data;
 
-  // Update base product fields
   return await prisma.$transaction(async (tx) => {
-    // Delete existing relations to avoid duplicates on rewrite
     if (images) await tx.image.deleteMany({ where: { productId: id } });
     if (variants) await tx.variant.deleteMany({ where: { productId: id } });
 

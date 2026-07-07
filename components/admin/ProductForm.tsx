@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product, ProductImage, ProductVariant, Size } from '@/types';
 import ImageUploader from './ImageUploader';
@@ -31,7 +31,10 @@ export default function ProductForm({ initialData, productId, mode }: Props) {
   const [error, setError] = useState('');
 
   const [name, setName] = useState(initialData?.name ?? '');
+  const [slug, setSlug] = useState(initialData?.slug ?? '');
   const [category, setCategory] = useState(initialData?.category ?? 'men');
+  const [subcategoryId, setSubcategoryId] = useState((initialData as any)?.subcategoryId ?? '');
+  const [subcategories, setSubcategories] = useState<{ id: string; name: string; slug: string }[]>([]);
   const [price, setPrice] = useState(String(initialData?.price ?? ''));
   const [originalPrice, setOriginalPrice] = useState(String(initialData?.originalPrice ?? ''));
   const [description, setDescription] = useState(initialData?.description ?? '');
@@ -62,13 +65,32 @@ export default function ProductForm({ initialData, productId, mode }: Props) {
     );
   };
 
+  // Fetch subcategories whenever the main category changes
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/subcategories?category=${category}`)
+      .then(res => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        setSubcategories(data);
+        // If the currently selected subcategory doesn't belong to this category anymore, clear it
+        if (subcategoryId && !data.find((s: any) => s.id === subcategoryId)) {
+          setSubcategoryId('');
+        }
+      })
+      .catch(() => { if (!cancelled) setSubcategories([]); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !price) { setError('Name and price are required.'); return; }
     setSaving(true); setError('');
 
     const payload = {
-      name: name.trim(), category, price: Number(price), originalPrice: Number(originalPrice || price),
+      name: name.trim(), slug: slug.trim() || undefined, category, subcategoryId: subcategoryId || null,
+      price: Number(price), originalPrice: Number(originalPrice || price),
       description, shortDesc, fabric, fit,
       badge: badge.trim() || undefined,
       isNew, isFeatured, isBestseller,
@@ -103,6 +125,13 @@ export default function ProductForm({ initialData, productId, mode }: Props) {
               <div>
                 <label style={labelStyle}>Product Name *</label>
                 <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Chaos Theory" style={inputStyle} required />
+              </div>
+              <div>
+                <label style={labelStyle}>URL Slug</label>
+                <input value={slug} onChange={e => setSlug(e.target.value)} placeholder="auto-generated from name if left blank" style={inputStyle} />
+                <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.3rem' }}>
+                  URL: root-domain/product/{slug || 'auto-generated-slug'}
+                </p>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
@@ -194,6 +223,21 @@ export default function ProductForm({ initialData, productId, mode }: Props) {
                   <option value="women">Women</option>
                   <option value="unisex">Unisex</option>
                 </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Subcategory</label>
+                <select value={subcategoryId} onChange={e => setSubcategoryId(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                  <option value="">— None —</option>
+                  {subcategories.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+                {subcategories.length === 0 && (
+                  <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.3rem' }}>
+                    No subcategories for {category} yet.{' '}
+                    <a href="/admin/subcategories" style={{ color: '#ff3c1e' }}>Create one →</a>
+                  </p>
+                )}
               </div>
               <div>
                 <label style={labelStyle}>Badge Label</label>

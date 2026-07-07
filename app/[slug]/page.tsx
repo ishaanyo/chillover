@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getProductsByCategory } from '@/lib/products';
+import { getSubcategoryWithProducts } from '@/lib/subcategories';
 import ProductCard from '@/components/product/ProductCard';
 import CategoryFilters from '@/components/product/CategoryFilters';
 import type { Metadata } from 'next';
@@ -16,8 +17,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const meta = CATEGORY_META[slug];
   if (meta) return { title: meta.title, description: meta.desc };
-  // subcategory
-  return { title: `${slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ')} | ChillOver` };
+
+  const { subcategory } = await getSubcategoryWithProducts(slug);
+  if (subcategory) {
+    return { title: `${subcategory.name} | ChillOver` };
+  }
+  return { title: 'Not Found' };
 }
 
 export default async function SlugPage({
@@ -32,16 +37,26 @@ export default async function SlugPage({
 
   const isMain = MAIN_CATEGORIES.includes(slug);
 
-  // Fetch products — for main categories use existing logic, for subcategories filter by category field or tags
-  let products = await getProductsByCategory(slug === 'all' ? 'all' : slug);
+  let products;
+  let heading: string;
+  let sub: string;
+  let mainCategoryForTabs: string | null = null;
 
-  // If not a known main category and no products found, 404
-  if (!isMain && products.length === 0) notFound();
+  if (isMain) {
+    products = await getProductsByCategory(slug === 'all' ? 'all' : slug);
+    heading = CATEGORY_META[slug]?.heading ?? slug;
+    sub = CATEGORY_META[slug]?.sub ?? '';
+    mainCategoryForTabs = slug === 'all' ? null : slug;
+  } else {
+    // Try resolving as a subcategory
+    const result = await getSubcategoryWithProducts(slug);
+    if (!result.subcategory) notFound();
 
-  const meta = CATEGORY_META[slug] ?? {
-    heading: slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' '),
-    sub: `${products.length} products`,
-  };
+    products = result.products;
+    heading = result.subcategory.name;
+    sub = `${products.length} product${products.length !== 1 ? 's' : ''} · ${result.subcategory.mainCategory === 'men' ? "Men's" : "Women's"} Collection`;
+    mainCategoryForTabs = result.subcategory.mainCategory;
+  }
 
   // Apply filter
   if (filter === 'new')        products = products.filter(p => p.isNew);
@@ -68,13 +83,21 @@ export default async function SlugPage({
           <nav style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#888', marginBottom: '0.9rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <a href="/" style={{ color: '#888', textDecoration: 'none' }}>Home</a>
             <span>›</span>
-            <span style={{ color: '#ff3c1e' }}>{meta.heading}</span>
+            {!isMain && mainCategoryForTabs && (
+              <>
+                <a href={`/${mainCategoryForTabs}`} style={{ color: '#888', textDecoration: 'none' }}>
+                  {mainCategoryForTabs === 'men' ? 'Men' : 'Women'}
+                </a>
+                <span>›</span>
+              </>
+            )}
+            <span style={{ color: '#ff3c1e' }}>{heading}</span>
           </nav>
 
           <h1 style={{ fontFamily: 'Bebas Neue, serif', fontSize: 'clamp(2.5rem,6vw,5rem)', letterSpacing: '0.03em', textTransform: 'uppercase', lineHeight: 1, marginBottom: '0.4rem' }}>
-            {meta.heading}
+            {heading}
           </h1>
-          <p style={{ color: '#888', fontSize: '0.875rem', fontWeight: 300 }}>{meta.sub}</p>
+          <p style={{ color: '#888', fontSize: '0.875rem', fontWeight: 300 }}>{sub}</p>
 
           {/* Category tabs */}
           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>

@@ -49,6 +49,9 @@ export default async function AdminPage() {
         <Link href="/admin/products" style={{ background: 'transparent', color: '#e8e2d9', fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.8rem 1.8rem', textDecoration: 'none', border: '1px solid rgba(245,242,237,0.2)', display: 'inline-block' }}>
           Manage Products
         </Link>
+        <Link href="/admin/subcategories" style={{ background: 'transparent', color: '#e8e2d9', fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.8rem 1.8rem', textDecoration: 'none', border: '1px solid rgba(245,242,237,0.2)', display: 'inline-block' }}>
+          Manage Subcategories
+        </Link>
         <Link href="/" target="_blank" style={{ background: 'transparent', color: '#888', fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.8rem 1.8rem', textDecoration: 'none', border: '1px solid rgba(245,242,237,0.1)', display: 'inline-block' }}>
           View Store ↗
         </Link>
@@ -88,7 +91,7 @@ export default async function AdminPage() {
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <Link href={`/admin/products/${p.id}`} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#ff3c1e', textDecoration: 'none' }}>Edit</Link>
-                        <Link href={`/shop/${p.category}/${p.slug}`} target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>View ↗</Link>
+                        <Link href={`/product/${p.slug}`} target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.58rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>View ↗</Link>
                       </div>
                     </td>
                   </tr>

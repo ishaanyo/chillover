@@ -11,6 +11,8 @@ model Product {
   name          String
   slug          String    @unique
   category      String
+  subcategoryId String?
+  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
   price         Int
   originalPrice Int?
   description   String
@@ -27,6 +29,16 @@ model Product {
 
   images        Image[]
   variants      Variant[]
+}
+
+model Subcategory {
+  id           String    @id @default(cuid())
+  name         String
+  slug         String    @unique
+  mainCategory String
+  createdAt    DateTime  @default(now())
+
+  products     Product[]
 }
 
 model Image {

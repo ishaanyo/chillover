@@ -13,11 +13,20 @@ export interface ProductVariant {
   stock: number;
 }
 
+export interface Subcategory {
+  id: string;
+  name: string;
+  slug: string;
+  mainCategory: string;
+}
+
 export interface Product {
   id: string;
   name: string;
   slug: string;
   category: Gender;
+  subcategoryId?: string | null;
+  subcategory?: Subcategory | null;
   price: number;
   originalPrice: number;
   description: string;
