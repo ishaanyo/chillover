@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/cartContext';
 import { useWishlist } from '@/lib/wishlistContext';
+import { useSession } from 'next-auth/react';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -11,6 +12,7 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const { totalItems, toggleCart } = useCart();
   const { count: wishCount } = useWishlist();
+  const { data: session } = useSession();
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin');
 
@@ -35,6 +37,8 @@ export default function Navbar() {
         </Link>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           <Link href="/admin/products" style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Products</Link>
+          <Link href="/admin/orders" style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Orders</Link>
+          <Link href="/admin/subcategories" style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Subcategories</Link>
           <Link href="/admin/products/new" style={{ background: '#ff3c1e', color: '#fff', fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.4rem 1rem', textDecoration: 'none' }}>+ Add Product</Link>
           <Link href="/" style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>← Store</Link>
         </div>
@@ -81,6 +85,16 @@ export default function Navbar() {
 
           {/* Right actions */}
           <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexShrink: 0 }}>
+            {/* Account icon */}
+            <Link
+              href={session ? '/myaccount' : '/login'}
+              className="desktop-nav"
+              style={{ background: 'none', border: 'none', color: '#e8e2d9', cursor: 'pointer', fontSize: '1.1rem', padding: '0.3rem 0.5rem', display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+              title={session ? `My Account (${session.user?.name ?? ''})` : 'Login'}
+            >
+              👤
+            </Link>
+
             {/* Wishlist icon */}
             <button style={{ background: 'none', border: 'none', color: '#e8e2d9', cursor: 'pointer', fontSize: '1rem', padding: '0.3rem 0.5rem', position: 'relative', display: 'flex', alignItems: 'center' }} className="desktop-nav">
               ♡
@@ -122,6 +136,9 @@ export default function Navbar() {
                   {label} <span style={{ fontSize: '1.2rem', color: '#ff3c1e' }}>→</span>
                 </Link>
               ))}
+              <Link href={session ? '/myaccount' : '/login'} onClick={() => setMobileOpen(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.5rem', fontFamily: 'Bebas Neue, serif', fontSize: '1.9rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#f5f2ed', borderBottom: '1px solid rgba(245,242,237,0.05)', textDecoration: 'none' }}>
+                {session ? 'My Account' : 'Login'} <span style={{ fontSize: '1.2rem', color: '#ff3c1e' }}>→</span>
+              </Link>
             </div>
             <div style={{ padding: '1.5rem', borderTop: '1px solid rgba(245,242,237,0.07)' }}>
               <button onClick={() => { toggleCart(); setMobileOpen(false); }} style={{ width: '100%', background: '#ff3c1e', color: '#fff', fontFamily: 'Space Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', padding: '0.9rem', cursor: 'pointer' }}>

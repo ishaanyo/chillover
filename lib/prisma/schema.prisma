@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  category      String
+  subcategoryId String?
+  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  price         Int
+  originalPrice Int?
+  description   String
+  shortDesc     String
+  fabric        String?
+  fit           String?
+  badge         String?
+  isNew         Boolean   @default(false)
+  isFeatured    Boolean   @default(false)
+  isBestseller  Boolean   @default(false)
+  features      String[]  
+  tags          String[]
+  createdAt     DateTime  @default(now())
+
+  images        Image[]
+  variants      Variant[]
+}
+
+model Subcategory {
+  id           String    @id @default(cuid())
+  name         String
+  slug         String    @unique
+  mainCategory String
+  createdAt    DateTime  @default(now())
+
+  products     Product[]
+}
+
+model Image {
+  id        String  @id @default(cuid())
+  url       String
+  alt       String
+  order     Int
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Variant {
+  id        String  @id @default(cuid())
+  size      String
+  stock     Int
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// Add an Enum for roles
+enum Role {
+  USER
+  ADMIN
+}
+
+// Add the User model
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String    // We will hash this!
+  role          Role      @default(USER) // Defaults to normal customer
+  createdAt     DateTime  @default(now())
+
+  orders        Order[]
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+  subtotal        Int
+  shippingFee     Int         @default(0)
+  totalAmount     Int
+  status          OrderStatus @default(PENDING)
+  paymentId       String?
+  shippingName    String
+  shippingPhone   String
+  shippingLine1   String
+  shippingLine2   String?
+  shippingCity    String
+  shippingState   String
+  shippingPincode String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String?
+  productName  String
+  productImage String?
+  productSlug  String?
+  size         String
+  quantity     Int
+  price        Int
+}

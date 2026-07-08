@@ -1,17 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { loginAction } from '@/lib/actions/auth';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') ?? '';
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
     setError('');
-    
+
     // Call our server action
     const res = await loginAction(formData);
     if (res?.error) {
@@ -31,11 +34,13 @@ export default function LoginPage() {
         </p>
 
         <form action={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+          <input type="hidden" name="callbackUrl" value={callbackUrl} />
+
           <div>
             <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', marginBottom: '0.4rem' }}>Email</label>
             <input name="email" type="email" required style={{ width: '100%', padding: '0.8rem', background: '#111', border: '1px solid rgba(245,242,237,0.1)', color: '#f5f2ed', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }} />
           </div>
-          
+
           <div>
             <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', marginBottom: '0.4rem' }}>Password</label>
             <input name="password" type="password" required style={{ width: '100%', padding: '0.8rem', background: '#111', border: '1px solid rgba(245,242,237,0.1)', color: '#f5f2ed', fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }} />

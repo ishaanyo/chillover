@@ -10,10 +10,12 @@ import { redirect } from 'next/navigation';
 export async function loginAction(formData: FormData) {
   try {
     const email = formData.get('email') as string;
-    
+    const callbackUrl = formData.get('callbackUrl') as string | null;
+
     // Check the user's role in the database to determine where they should go
     const user = await prisma.user.findUnique({ where: { email } });
-    const redirectUrl = user?.role === 'ADMIN' ? '/admin' : '/';
+    const defaultRedirect = user?.role === 'ADMIN' ? '/admin' : '/myaccount';
+    const redirectUrl = callbackUrl && callbackUrl.trim() ? callbackUrl : defaultRedirect;
 
     // Tell NextAuth where to send the user after a successful login
     formData.append('redirectTo', redirectUrl);
