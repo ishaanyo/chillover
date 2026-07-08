@@ -35,9 +35,51 @@ export default function CartPage() {
   const [codEnabled, setCodEnabled] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'RAZORPAY' | 'COD'>('RAZORPAY');
 
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [addingNewAddress, setAddingNewAddress] = useState(false);
+  const [addressesLoaded, setAddressesLoaded] = useState(false);
+
   useEffect(() => {
     fetch('/api/settings').then(res => res.json()).then(data => setCodEnabled(Boolean(data.codEnabled))).catch(() => setCodEnabled(false));
   }, []);
+
+  // Load the customer's saved addresses once logged in, and pre-select their default
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    fetch('/api/addresses')
+      .then(res => res.json())
+      .then(data => {
+        const addrs = data.addresses ?? [];
+        setSavedAddresses(addrs);
+        const defaultAddr = addrs.find((a: any) => a.isDefault) ?? addrs[0];
+        if (defaultAddr) {
+          selectSavedAddress(defaultAddr);
+        } else {
+          setAddingNewAddress(true);
+        }
+      })
+      .catch(() => setAddingNewAddress(true))
+      .finally(() => setAddressesLoaded(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
+  const selectSavedAddress = (addr: any) => {
+    setSelectedAddressId(addr.id);
+    setAddingNewAddress(false);
+    setAddress({
+      name: addr.name, phone: addr.phone, line1: addr.line1,
+      line2: addr.line2 ?? '', city: addr.city, state: addr.state, pincode: addr.pincode,
+    });
+    setAddressError('');
+  };
+
+  const startNewAddress = () => {
+    setSelectedAddressId(null);
+    setAddingNewAddress(true);
+    setAddress({ name: session?.user?.name ?? '', phone: '', line1: '', line2: '', city: '', state: '', pincode: '' });
+    setAddressError('');
+  };
 
   const freeShip = 999;
   const remaining = Math.max(0, freeShip - subtotal);
@@ -98,6 +140,25 @@ export default function CartPage() {
       alert(`${method === 'RAZORPAY' ? 'Payment succeeded but saving your order failed' : 'Failed to place order'}: ${data.error ?? 'Unknown error'}.${suffix}`);
       setProcessing(false);
       return;
+    }
+
+    // If this was a freshly typed address (not one already in the address book), save it for next time
+    if (!selectedAddressId) {
+      fetch('/api/addresses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          label: 'Home',
+          name: address.name,
+          phone: address.phone,
+          line1: address.line1,
+          line2: address.line2 || undefined,
+          city: address.city,
+          state: address.state,
+          pincode: address.pincode,
+          isDefault: savedAddresses.length === 0,
+        }),
+      }).catch(() => { /* non-critical — order already placed successfully */ });
     }
 
     clearCart();
@@ -254,6 +315,51 @@ export default function CartPage() {
                   </p>
                 )}
 
+                {/* Saved addresses */}
+                {status === 'authenticated' && savedAddresses.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.2rem' }}>
+                    {savedAddresses.map(addr => (
+                      <label
+                        key={addr.id}
+                        onClick={() => selectSavedAddress(addr)}
+                        style={{
+                          display: 'flex', alignItems: 'flex-start', gap: '0.7rem', padding: '0.9rem 1rem', cursor: 'pointer',
+                          border: `1px solid ${selectedAddressId === addr.id ? '#ff3c1e' : 'rgba(245,242,237,0.12)'}`,
+                          background: selectedAddressId === addr.id ? 'rgba(255,60,30,0.06)' : 'transparent',
+                        }}
+                      >
+                        <input type="radio" checked={selectedAddressId === addr.id} onChange={() => selectSavedAddress(addr)} style={{ marginTop: '0.2rem' }} />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{addr.name}</span>
+                            <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.52rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#ff3c1e', border: '1px solid #ff3c1e', padding: '0.12rem 0.4rem' }}>{addr.label}</span>
+                            {addr.isDefault && <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.52rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1aff9c' }}>Default</span>}
+                          </div>
+                          <p style={{ fontSize: '0.78rem', color: '#888', lineHeight: 1.5 }}>
+                            {addr.line1}{addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}, {addr.state} {addr.pincode}
+                          </p>
+                          <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.2rem' }}>Mobile: {addr.phone}</p>
+                        </div>
+                      </label>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={startNewAddress}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1rem', cursor: 'pointer',
+                        border: `1px dashed ${addingNewAddress ? '#ff3c1e' : 'rgba(245,242,237,0.2)'}`,
+                        background: 'transparent', color: addingNewAddress ? '#ff3c1e' : '#888',
+                        fontFamily: 'Space Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.08em', textTransform: 'uppercase',
+                      }}
+                    >
+                      + Deliver to a new address
+                    </button>
+                  </div>
+                )}
+
+                {/* Manual entry form — shown for new address entry, or when no saved addresses exist yet */}
+                {(addingNewAddress || savedAddresses.length === 0) && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <div>
@@ -287,7 +393,11 @@ export default function CartPage() {
                       <input value={address.pincode} onChange={e => updateField('pincode', e.target.value)} placeholder="6-digit" style={inputStyle} />
                     </div>
                   </div>
+                  {savedAddresses.length > 0 && (
+                    <p style={{ fontSize: '0.7rem', color: '#666' }}>This address will be saved to your account for next time.</p>
+                  )}
                 </div>
+                )}
 
                 {addressError && <p style={{ color: '#ff3c1e', fontSize: '0.75rem', marginTop: '1rem' }}>{addressError}</p>}
               </div>
