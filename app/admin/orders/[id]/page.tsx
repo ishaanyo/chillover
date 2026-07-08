@@ -28,6 +28,9 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           {serialized.paymentId && (
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.68rem', color: '#666', marginTop: '0.3rem' }}>Payment ID: {serialized.paymentId}</p>
           )}
+          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: serialized.paymentMethod === 'COD' ? '#ff8c00' : '#1aff9c', marginTop: '0.4rem' }}>
+            {serialized.paymentMethod === 'COD' ? '💵 Cash on Delivery' : '💳 Paid Online (Razorpay)'}
+          </p>
         </div>
         <AdminOrderStatusControl orderId={serialized.id} currentStatus={serialized.status} />
       </div>

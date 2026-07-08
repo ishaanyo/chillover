@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProducts, getProductsByCategory, createProduct, generateSlug } from '@/lib/products';
+import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const category = searchParams.get('category');
+  const ids = searchParams.get('ids');
+
+  if (ids) {
+    const idList = ids.split(',').map(s => s.trim()).filter(Boolean);
+    const products = await prisma.product.findMany({
+      where: { id: { in: idList } },
+      include: { images: { orderBy: { order: 'asc' } }, variants: true, subcategory: true },
+    });
+    return NextResponse.json({ products });
+  }
 
   let products;
   if (category && category !== 'all') {

@@ -55,6 +55,9 @@ export default async function AdminPage() {
         <Link href="/admin/subcategories" style={{ background: 'transparent', color: '#e8e2d9', fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.8rem 1.8rem', textDecoration: 'none', border: '1px solid rgba(245,242,237,0.2)', display: 'inline-block' }}>
           Manage Subcategories
         </Link>
+        <Link href="/admin/settings" style={{ background: 'transparent', color: '#e8e2d9', fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.8rem 1.8rem', textDecoration: 'none', border: '1px solid rgba(245,242,237,0.2)', display: 'inline-block' }}>
+          Store Settings
+        </Link>
         <Link href="/" target="_blank" style={{ background: 'transparent', color: '#888', fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.8rem 1.8rem', textDecoration: 'none', border: '1px solid rgba(245,242,237,0.1)', display: 'inline-block' }}>
           View Store ↗
         </Link>

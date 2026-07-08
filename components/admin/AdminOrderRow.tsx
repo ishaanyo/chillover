@@ -12,6 +12,7 @@ interface OrderItem {
 interface Order {
   id: string;
   status: string;
+  paymentMethod: string;
   totalAmount: number;
   createdAt: string;
   items: OrderItem[];
@@ -55,6 +56,9 @@ export default function AdminOrderRow({ order }: { order: Order }) {
         <Link href={`/admin/orders/${order.id}`} style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.72rem', color: '#f5f2ed', textDecoration: 'none' }}>
           #{order.id.slice(-8).toUpperCase()}
         </Link>
+        {order.paymentMethod === 'COD' && (
+          <span style={{ marginLeft: '0.5rem', fontFamily: 'Space Mono, monospace', fontSize: '0.5rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: '#ff8c00', border: '1px solid #ff8c00', padding: '0.1rem 0.35rem' }}>COD</span>
+        )}
         <p style={{ fontSize: '0.7rem', color: '#888', marginTop: '0.2rem' }}>{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
       </div>
 

@@ -104,6 +104,11 @@ enum OrderStatus {
   CANCELLED
 }
 
+model StoreSettings {
+  id         String  @id @default("main")
+  codEnabled Boolean @default(true)
+}
+
 model Order {
   id              String      @id @default(cuid())
   userId          String
@@ -113,6 +118,7 @@ model Order {
   shippingFee     Int         @default(0)
   totalAmount     Int
   status          OrderStatus @default(PENDING)
+  paymentMethod   String      @default("RAZORPAY")
   paymentId       String?
   shippingName    String
   shippingPhone   String

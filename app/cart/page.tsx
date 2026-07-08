@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/cartContext';
@@ -32,6 +32,12 @@ export default function CartPage() {
   });
   const [addressError, setAddressError] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [codEnabled, setCodEnabled] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'RAZORPAY' | 'COD'>('RAZORPAY');
+
+  useEffect(() => {
+    fetch('/api/settings').then(res => res.json()).then(data => setCodEnabled(Boolean(data.codEnabled))).catch(() => setCodEnabled(false));
+  }, []);
 
   const freeShip = 999;
   const remaining = Math.max(0, freeShip - subtotal);
@@ -57,7 +63,7 @@ export default function CartPage() {
     return true;
   };
 
-  const placeOrder = async (paymentId: string) => {
+  const placeOrder = async (method: 'RAZORPAY' | 'COD', paymentId?: string) => {
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -74,6 +80,7 @@ export default function CartPage() {
         subtotal,
         shippingFee: shipping,
         totalAmount: total,
+        paymentMethod: method,
         paymentId,
         shippingName: address.name,
         shippingPhone: address.phone,
@@ -87,7 +94,9 @@ export default function CartPage() {
 
     const data = await res.json();
     if (!res.ok) {
-      alert(`Payment succeeded but saving your order failed: ${data.error ?? 'Unknown error'}. Please contact support with payment ID: ${paymentId}`);
+      const suffix = paymentId ? ` Please contact support with payment ID: ${paymentId}` : '';
+      alert(`${method === 'RAZORPAY' ? 'Payment succeeded but saving your order failed' : 'Failed to place order'}: ${data.error ?? 'Unknown error'}.${suffix}`);
+      setProcessing(false);
       return;
     }
 
@@ -96,12 +105,6 @@ export default function CartPage() {
   };
 
   const initiateRazorpay = () => {
-    if (status !== 'authenticated') {
-      router.push('/login?callbackUrl=/cart');
-      return;
-    }
-    if (!validateAddress()) return;
-
     setProcessing(true);
     const load = () => {
       const options = {
@@ -111,7 +114,7 @@ export default function CartPage() {
         name: 'ChillOver',
         description: `${totalItems} Oversized T-Shirt${totalItems > 1 ? 's' : ''}`,
         handler: async (response: any) => {
-          await placeOrder(response.razorpay_payment_id);
+          await placeOrder('RAZORPAY', response.razorpay_payment_id);
         },
         modal: { ondismiss: () => setProcessing(false) },
         prefill: { name: address.name, email: session?.user?.email ?? '', contact: address.phone },
@@ -125,6 +128,21 @@ export default function CartPage() {
     s.src = 'https://checkout.razorpay.com/v1/checkout.js';
     s.onload = load;
     document.head.appendChild(s);
+  };
+
+  const handleCheckout = () => {
+    if (status !== 'authenticated') {
+      router.push('/login?callbackUrl=/cart');
+      return;
+    }
+    if (!validateAddress()) return;
+
+    if (paymentMethod === 'COD') {
+      setProcessing(true);
+      placeOrder('COD');
+    } else {
+      initiateRazorpay();
+    }
   };
 
   return (
@@ -308,13 +326,34 @@ export default function CartPage() {
                   </div>
                 </div>
 
+                {/* Payment method selector */}
+                {codEnabled && (
+                  <div style={{ marginBottom: '1.2rem' }}>
+                    <p style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.58rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', marginBottom: '0.6rem' }}>Payment Method</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.8rem 1rem', border: `1px solid ${paymentMethod === 'RAZORPAY' ? '#ff3c1e' : 'rgba(245,242,237,0.12)'}`, cursor: 'pointer', background: paymentMethod === 'RAZORPAY' ? 'rgba(255,60,30,0.06)' : 'transparent' }}>
+                        <input type="radio" name="paymentMethod" checked={paymentMethod === 'RAZORPAY'} onChange={() => setPaymentMethod('RAZORPAY')} />
+                        <div>
+                          <p style={{ fontSize: '0.82rem' }}>Pay Online</p>
+                          <p style={{ fontSize: '0.68rem', color: '#888' }}>UPI, Cards, Net Banking via Razorpay</p>
+                        </div>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.8rem 1rem', border: `1px solid ${paymentMethod === 'COD' ? '#ff3c1e' : 'rgba(245,242,237,0.12)'}`, cursor: 'pointer', background: paymentMethod === 'COD' ? 'rgba(255,60,30,0.06)' : 'transparent' }}>
+                        <input type="radio" name="paymentMethod" checked={paymentMethod === 'COD'} onChange={() => setPaymentMethod('COD')} />
+                        <div>
+                          <p style={{ fontSize: '0.82rem' }}>Cash on Delivery</p>
+                          <p style={{ fontSize: '0.68rem', color: '#888' }}>Pay when your order arrives</p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
                 {/* Checkout button */}
-                <button onClick={initiateRazorpay} disabled={processing} style={{ width: '100%', background: processing ? '#333' : '#072654', color: '#fff', fontFamily: 'Space Mono, monospace', fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', padding: '1rem', cursor: processing ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', transition: 'background 0.2s', marginBottom: '0.6rem' }}
-                  onMouseOver={e => !processing && (e.currentTarget.style.background = '#0a3a7a')}
-                  onMouseOut={e => !processing && (e.currentTarget.style.background = '#072654')}>
-                  {processing ? 'Processing…' : status === 'authenticated' ? (
+                <button onClick={handleCheckout} disabled={processing} style={{ width: '100%', background: processing ? '#333' : paymentMethod === 'COD' ? '#ff3c1e' : '#072654', color: '#fff', fontFamily: 'Space Mono, monospace', fontSize: '0.72rem', letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', padding: '1rem', cursor: processing ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', transition: 'background 0.2s', marginBottom: '0.6rem' }}>
+                  {processing ? 'Processing…' : status !== 'authenticated' ? 'Login to Checkout' : paymentMethod === 'COD' ? 'Place Order (COD)' : (
                     <>Pay with <span style={{ color: '#3395ff', fontWeight: 700, fontFamily: 'DM Sans, sans-serif' }}>Razorpay</span></>
-                  ) : 'Login to Checkout'}
+                  )}
                 </button>
 
                 <p style={{ textAlign: 'center', fontSize: '0.6rem', color: '#666', fontFamily: 'Space Mono, monospace', letterSpacing: '0.05em', marginBottom: '1.2rem' }}>

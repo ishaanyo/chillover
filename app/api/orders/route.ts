@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { createOrder, getOrdersByUserId } from '@/lib/orders';
+import { getStoreSettings } from '@/lib/settings';
 
 // GET /api/orders -> the logged-in customer's own orders
 export async function GET() {
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      items, subtotal, shippingFee, totalAmount, paymentId,
+      items, subtotal, shippingFee, totalAmount, paymentId, paymentMethod,
       shippingName, shippingPhone, shippingLine1, shippingLine2,
       shippingCity, shippingState, shippingPincode,
     } = body;
@@ -34,12 +35,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Complete shipping address is required.' }, { status: 400 });
     }
 
+    const method = paymentMethod === 'COD' ? 'COD' : 'RAZORPAY';
+    if (method === 'RAZORPAY' && !paymentId) {
+      return NextResponse.json({ error: 'Payment ID is required for prepaid orders.' }, { status: 400 });
+    }
+
+    // If COD is selected, verify it's currently allowed store-wide
+    if (method === 'COD') {
+      const settings = await getStoreSettings();
+      if (!settings.codEnabled) {
+        return NextResponse.json({ error: 'Cash on Delivery is currently unavailable.' }, { status: 400 });
+      }
+    }
+
     const order = await createOrder({
       userId: session.user.id,
       items,
       subtotal: Number(subtotal) || 0,
       shippingFee: Number(shippingFee) || 0,
       totalAmount: Number(totalAmount) || 0,
+      paymentMethod: method,
       paymentId,
       shippingName,
       shippingPhone,

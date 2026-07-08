@@ -39,6 +39,7 @@ export default function Navbar() {
           <Link href="/admin/products" style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Products</Link>
           <Link href="/admin/orders" style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Orders</Link>
           <Link href="/admin/subcategories" style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Subcategories</Link>
+          <Link href="/admin/settings" style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Settings</Link>
           <Link href="/admin/products/new" style={{ background: '#ff3c1e', color: '#fff', fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.4rem 1rem', textDecoration: 'none' }}>+ Add Product</Link>
           <Link href="/" style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>← Store</Link>
         </div>
@@ -96,12 +97,12 @@ export default function Navbar() {
             </Link>
 
             {/* Wishlist icon */}
-            <button style={{ background: 'none', border: 'none', color: '#e8e2d9', cursor: 'pointer', fontSize: '1rem', padding: '0.3rem 0.5rem', position: 'relative', display: 'flex', alignItems: 'center' }} className="desktop-nav">
+            <Link href="/wishlist" style={{ background: 'none', border: 'none', color: '#e8e2d9', cursor: 'pointer', fontSize: '1rem', padding: '0.3rem 0.5rem', position: 'relative', display: 'flex', alignItems: 'center', textDecoration: 'none' }} className="desktop-nav">
               ♡
               {mounted && wishCount > 0 && (
                 <span style={{ position: 'absolute', top: '0', right: '0', background: '#ff3c1e', color: '#fff', borderRadius: '50%', width: '14px', height: '14px', fontSize: '0.48rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Space Mono, monospace' }}>{wishCount}</span>
               )}
-            </button>
+            </Link>
 
             {/* Cart button */}
             <button

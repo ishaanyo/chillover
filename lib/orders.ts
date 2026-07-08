@@ -16,6 +16,7 @@ interface CreateOrderInput {
   subtotal: number;
   shippingFee: number;
   totalAmount: number;
+  paymentMethod: 'RAZORPAY' | 'COD';
   paymentId?: string;
   shippingName: string;
   shippingPhone: string;
@@ -26,13 +27,14 @@ interface CreateOrderInput {
   shippingPincode: string;
 }
 
-// Create a new order (called right after a successful Razorpay payment)
+// Create a new order (called right after a successful Razorpay payment, or immediately for COD)
 export async function createOrder(data: CreateOrderInput) {
-  const { items, ...orderData } = data;
+  const { items, paymentMethod, ...orderData } = data;
   return prisma.order.create({
     data: {
       ...orderData,
-      status: 'CONFIRMED',
+      paymentMethod,
+      status: paymentMethod === 'COD' ? 'PENDING' : 'CONFIRMED',
       items: { create: items },
     },
     include: { items: true },

@@ -103,6 +103,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888' }}>Total</span>
               <span style={{ fontFamily: 'Bebas Neue, serif', fontSize: '1.5rem' }}>₹{order.totalAmount}</span>
             </div>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.62rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#888', marginTop: '0.8rem' }}>
+              {order.paymentMethod === 'COD' ? '💵 Cash on Delivery' : '💳 Paid Online'}
+            </p>
           </div>
 
           <div style={{ background: '#1a1a1a', border: '1px solid rgba(245,242,237,0.07)', padding: '1.5rem' }}>

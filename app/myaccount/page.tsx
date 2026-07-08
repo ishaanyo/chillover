@@ -26,6 +26,7 @@ export default async function MyAccountOverview() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         {[
           { label: 'My Orders', desc: 'View, modify and track orders', icon: '📦', href: '/myaccount/orders' },
+          { label: 'My Wishlist', desc: 'Products you have saved', icon: '♡', href: '/wishlist' },
           { label: 'My Addresses', desc: 'Edit, add or remove addresses', icon: '📍', href: '/myaccount/addresses' },
           { label: 'My Profile', desc: 'Edit personal info', icon: '👤', href: '/myaccount/profile' },
           { label: 'Help & Support', desc: 'Reach out to us', icon: 'ⓘ', href: '/myaccount/help' },
