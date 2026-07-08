@@ -17,6 +17,9 @@ export default function SignupPage() {
     if (res?.error) {
       setError(res.error);
       setLoading(false);
+      if (res.redirectToLogin) {
+        setTimeout(() => { window.location.href = '/login'; }, 1200);
+      }
     }
   }
 

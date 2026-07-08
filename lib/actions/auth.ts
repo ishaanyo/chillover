@@ -4,12 +4,12 @@ import { signIn, signOut } from '@/auth';
 import { AuthError } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { redirect } from 'next/navigation';
 
 // 1. Handle Login
 export async function loginAction(formData: FormData) {
   try {
     const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
     const callbackUrl = formData.get('callbackUrl') as string | null;
 
     // Check the user's role in the database to determine where they should go
@@ -17,10 +17,13 @@ export async function loginAction(formData: FormData) {
     const defaultRedirect = user?.role === 'ADMIN' ? '/admin' : '/myaccount';
     const redirectUrl = callbackUrl && callbackUrl.trim() ? callbackUrl : defaultRedirect;
 
-    // Tell NextAuth where to send the user after a successful login
-    formData.append('redirectTo', redirectUrl);
-
-    await signIn('credentials', formData);
+    // Pass an explicit options object (not the raw FormData) so there's no ambiguity
+    // about which field Auth.js treats as the redirect target.
+    await signIn('credentials', {
+      email,
+      password,
+      redirectTo: redirectUrl,
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -30,7 +33,7 @@ export async function loginAction(formData: FormData) {
           return { error: 'Something went wrong.' };
       }
     }
-    throw error; 
+    throw error;
   }
 }
 
@@ -58,7 +61,21 @@ export async function registerAction(formData: FormData) {
     },
   });
 
-  redirect('/login');
+  // Immediately log the new user in and take them straight to their account
+  try {
+    await signIn('credentials', {
+      email,
+      password,
+      redirectTo: '/myaccount',
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      // Account was created successfully even if auto-login somehow fails —
+      // fall back to sending them to the login page instead of erroring out.
+      return { error: 'Account created! Please log in.', redirectToLogin: true };
+    }
+    throw error;
+  }
 }
 
 // 3. Handle Logout

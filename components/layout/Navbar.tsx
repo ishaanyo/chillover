@@ -5,11 +5,13 @@ import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/cartContext';
 import { useWishlist } from '@/lib/wishlistContext';
 import { useSession } from 'next-auth/react';
+import { logoutAction } from '@/lib/actions/auth';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const { totalItems, toggleCart } = useCart();
   const { count: wishCount } = useWishlist();
   const { data: session } = useSession();
@@ -87,14 +89,56 @@ export default function Navbar() {
           {/* Right actions */}
           <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexShrink: 0 }}>
             {/* Account icon */}
-            <Link
-              href={session ? '/myaccount' : '/login'}
-              className="desktop-nav"
-              style={{ background: 'none', border: 'none', color: '#e8e2d9', cursor: 'pointer', fontSize: '1.1rem', padding: '0.3rem 0.5rem', display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-              title={session ? `My Account (${session.user?.name ?? ''})` : 'Login'}
-            >
-              👤
-            </Link>
+            {session ? (
+              <div
+                className="desktop-nav"
+                style={{ position: 'relative' }}
+                onMouseEnter={() => setAccountMenuOpen(true)}
+                onMouseLeave={() => setAccountMenuOpen(false)}
+              >
+                <Link
+                  href="/myaccount"
+                  style={{ background: 'none', border: 'none', color: '#e8e2d9', cursor: 'pointer', fontSize: '1.1rem', padding: '0.3rem 0.5rem', display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+                  title={`My Account (${session.user?.name ?? ''})`}
+                >
+                  👤
+                </Link>
+
+                {accountMenuOpen && (
+                  <div style={{ position: 'absolute', top: '100%', right: 0, paddingTop: '0.5rem', zIndex: 50 }}>
+                    <div style={{ background: '#1a1a1a', border: '1px solid rgba(245,242,237,0.1)', minWidth: '200px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+                      <div style={{ padding: '0.9rem 1.1rem', borderBottom: '1px solid rgba(245,242,237,0.07)' }}>
+                        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.05em', color: '#888' }}>Hi, {session.user?.name?.split(' ')[0]}</p>
+                      </div>
+                      {[
+                        { label: 'My Account', href: '/myaccount' },
+                        { label: 'My Orders', href: '/myaccount/orders' },
+                        { label: 'My Wishlist', href: '/wishlist' },
+                        { label: 'My Addresses', href: '/myaccount/addresses' },
+                      ].map(item => (
+                        <Link key={item.href} href={item.href} style={{ display: 'block', padding: '0.8rem 1.1rem', fontFamily: 'Space Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: '#e8e2d9', textDecoration: 'none', borderBottom: '1px solid rgba(245,242,237,0.05)' }}>
+                          {item.label}
+                        </Link>
+                      ))}
+                      <form action={logoutAction}>
+                        <button type="submit" style={{ width: '100%', textAlign: 'left', padding: '0.8rem 1.1rem', fontFamily: 'Space Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: '#ff3c1e', background: 'none', border: 'none', cursor: 'pointer' }}>
+                          Logout
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="desktop-nav"
+                style={{ background: 'none', border: 'none', color: '#e8e2d9', cursor: 'pointer', fontSize: '1.1rem', padding: '0.3rem 0.5rem', display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+                title="Login"
+              >
+                👤
+              </Link>
+            )}
 
             {/* Wishlist icon */}
             <Link href="/wishlist" style={{ background: 'none', border: 'none', color: '#e8e2d9', cursor: 'pointer', fontSize: '1rem', padding: '0.3rem 0.5rem', position: 'relative', display: 'flex', alignItems: 'center', textDecoration: 'none' }} className="desktop-nav">
