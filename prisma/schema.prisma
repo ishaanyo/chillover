@@ -72,4 +72,48 @@ model User {
   password      String    // We will hash this!
   role          Role      @default(USER) // Defaults to normal customer
   createdAt     DateTime  @default(now())
+
+  orders        Order[]
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+  subtotal        Int
+  shippingFee     Int         @default(0)
+  totalAmount     Int
+  status          OrderStatus @default(PENDING)
+  paymentId       String?
+  shippingName    String
+  shippingPhone   String
+  shippingLine1   String
+  shippingLine2   String?
+  shippingCity    String
+  shippingState   String
+  shippingPincode String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String?
+  productName  String
+  productImage String?
+  productSlug  String?
+  size         String
+  quantity     Int
+  price        Int
 }
