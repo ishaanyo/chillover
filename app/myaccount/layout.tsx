@@ -10,6 +10,9 @@ export default async function MyAccountLayout({ children }: { children: React.Re
   const navItems = [
     { label: 'Overview', href: '/myaccount', icon: '⊞' },
     { label: 'My Orders', href: '/myaccount/orders', icon: '📦' },
+    { label: 'My Addresses', href: '/myaccount/addresses', icon: '📍' },
+    { label: 'My Profile', href: '/myaccount/profile', icon: '👤' },
+    { label: 'Help & Support', href: '/myaccount/help', icon: 'ⓘ' },
   ];
 
   return (

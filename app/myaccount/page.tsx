@@ -22,6 +22,22 @@ export default async function MyAccountOverview() {
       </h1>
       <p style={{ color: '#888', fontSize: '0.875rem', marginBottom: '2rem' }}>Manage your orders and account details.</p>
 
+      {/* Quick links */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+        {[
+          { label: 'My Orders', desc: 'View, modify and track orders', icon: '📦', href: '/myaccount/orders' },
+          { label: 'My Addresses', desc: 'Edit, add or remove addresses', icon: '📍', href: '/myaccount/addresses' },
+          { label: 'My Profile', desc: 'Edit personal info', icon: '👤', href: '/myaccount/profile' },
+          { label: 'Help & Support', desc: 'Reach out to us', icon: 'ⓘ', href: '/myaccount/help' },
+        ].map(card => (
+          <Link key={card.href} href={card.href} style={{ background: '#1a1a1a', border: '1px solid rgba(245,242,237,0.07)', padding: '1.5rem 1.2rem', textAlign: 'center', textDecoration: 'none', color: 'inherit', transition: 'border-color 0.2s' }}>
+            <div style={{ fontSize: '1.8rem', marginBottom: '0.6rem' }}>{card.icon}</div>
+            <p style={{ fontSize: '0.85rem', fontWeight: 500, marginBottom: '0.3rem' }}>{card.label}</p>
+            <p style={{ fontSize: '0.68rem', color: '#888' }}>{card.desc}</p>
+          </Link>
+        ))}
+      </div>
+
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         <div style={{ background: '#1a1a1a', border: '1px solid rgba(245,242,237,0.07)', padding: '1.3rem' }}>

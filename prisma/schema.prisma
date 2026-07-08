@@ -71,9 +71,29 @@ model User {
   email         String    @unique
   password      String    // We will hash this!
   role          Role      @default(USER) // Defaults to normal customer
+  phone         String?
+  dob           DateTime?
+  gender        String?
   createdAt     DateTime  @default(now())
 
   orders        Order[]
+  addresses     Address[]
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String   @default("Home")
+  name      String
+  phone     String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  pincode   String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 enum OrderStatus {
