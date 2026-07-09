@@ -99,6 +99,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#888', marginBottom: '0.8rem' }}>
               <span>Shipping</span><span>{order.shippingFee === 0 ? 'FREE' : `₹${order.shippingFee}`}</span>
             </div>
+            {order.discountAmount > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#1aff9c', marginBottom: '0.8rem' }}>
+                <span>Coupon ({order.couponCode})</span><span>−₹{order.discountAmount}</span>
+              </div>
+            )}
             <div style={{ borderTop: '1px solid rgba(245,242,237,0.1)', paddingTop: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888' }}>Total</span>
               <span style={{ fontFamily: 'Bebas Neue, serif', fontSize: '1.5rem' }}>₹{order.totalAmount}</span>
@@ -117,6 +122,27 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               📞 {order.shippingPhone}
             </p>
           </div>
+
+          {order.waybill && (
+            <div style={{ background: '#1a1a1a', border: '1px solid rgba(245,242,237,0.07)', padding: '1.5rem' }}>
+              <h2 style={{ fontFamily: 'Bebas Neue, serif', fontSize: '1.3rem', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem' }}>Tracking</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                <span style={{ fontSize: '0.78rem', color: '#888' }}>Waybill</span>
+                <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.78rem', color: '#e8e2d9' }}>{order.waybill}</span>
+              </div>
+              {order.courierStatus && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                  <span style={{ fontSize: '0.78rem', color: '#888' }}>Status</span>
+                  <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.72rem', color: '#4af', textTransform: 'uppercase' }}>{order.courierStatus}</span>
+                </div>
+              )}
+              {order.trackingUrl && (
+                <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', background: '#ff3c1e', color: '#fff', fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.8rem', textDecoration: 'none' }}>
+                  Track Package ↗
+                </a>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

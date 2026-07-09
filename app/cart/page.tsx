@@ -40,6 +40,11 @@ export default function CartPage() {
   const [addingNewAddress, setAddingNewAddress] = useState(false);
   const [addressesLoaded, setAddressesLoaded] = useState(false);
 
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [couponError, setCouponError] = useState('');
+  const [couponChecking, setCouponChecking] = useState(false);
+
   useEffect(() => {
     fetch('/api/settings').then(res => res.json()).then(data => setCodEnabled(Boolean(data.codEnabled))).catch(() => setCodEnabled(false));
   }, []);
@@ -84,7 +89,62 @@ export default function CartPage() {
   const freeShip = 999;
   const remaining = Math.max(0, freeShip - subtotal);
   const shipping = subtotal >= freeShip ? 0 : 99;
-  const total = subtotal + shipping;
+  const discount = appliedCoupon?.discount ?? 0;
+  const total = Math.max(0, subtotal + shipping - discount);
+
+  const applyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setCouponChecking(true);
+    setCouponError('');
+
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponInput.trim(), subtotal }),
+      });
+      const data = await res.json();
+
+      if (!data.valid) {
+        setCouponError(data.message ?? 'Invalid coupon code.');
+        setAppliedCoupon(null);
+      } else {
+        setAppliedCoupon({ code: data.coupon.code, discount: data.discount });
+        setCouponError('');
+      }
+    } catch {
+      setCouponError('Failed to apply coupon. Please try again.');
+    } finally {
+      setCouponChecking(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput('');
+    setCouponError('');
+  };
+
+  // Re-validate whenever the cart subtotal changes, since min-order-value or cap may no longer apply
+  useEffect(() => {
+    if (!appliedCoupon) return;
+    fetch('/api/coupons/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: appliedCoupon.code, subtotal }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.valid) {
+          setAppliedCoupon(null);
+          setCouponError(data.message ?? 'Coupon no longer valid for this order.');
+        } else if (data.discount !== appliedCoupon.discount) {
+          setAppliedCoupon(prev => prev ? { ...prev, discount: data.discount } : null);
+        }
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subtotal]);
 
   const updateField = (field: keyof typeof address, value: string) => setAddress(prev => ({ ...prev, [field]: value }));
 
@@ -121,6 +181,8 @@ export default function CartPage() {
         })),
         subtotal,
         shippingFee: shipping,
+        couponCode: appliedCoupon?.code,
+        discountAmount: discount,
         totalAmount: total,
         paymentMethod: method,
         paymentId,
@@ -408,6 +470,36 @@ export default function CartPage() {
               <div style={{ background: '#1a1a1a', border: '1px solid rgba(245,242,237,0.07)', padding: '1.5rem' }}>
                 <h2 style={{ fontFamily: 'Bebas Neue, serif', fontSize: '1.8rem', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>Order Summary</h2>
 
+                {/* Coupon */}
+                <div style={{ marginBottom: '1.2rem' }}>
+                  {appliedCoupon ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.7rem 0.9rem', background: 'rgba(26,255,156,0.06)', border: '1px solid rgba(26,255,156,0.3)' }}>
+                      <div>
+                        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.72rem', color: '#1aff9c' }}>✓ {appliedCoupon.code} applied</p>
+                        <p style={{ fontSize: '0.68rem', color: '#888', marginTop: '0.1rem' }}>You saved ₹{appliedCoupon.discount}</p>
+                      </div>
+                      <button onClick={removeCoupon} style={{ background: 'none', border: 'none', color: '#888', fontFamily: 'Space Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' }}>Remove</button>
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ display: 'flex', gap: 0 }}>
+                        <input
+                          type="text"
+                          value={couponInput}
+                          onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponError(''); }}
+                          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } }}
+                          placeholder="Coupon code (CHILL20)"
+                          style={{ flex: 1, background: '#111', border: '1px solid rgba(245,242,237,0.1)', borderRight: 'none', color: '#f5f2ed', fontFamily: 'DM Sans, sans-serif', fontSize: '0.8rem', padding: '0.6rem 0.8rem', outline: 'none' }}
+                        />
+                        <button onClick={applyCoupon} disabled={couponChecking || !couponInput.trim()} style={{ background: 'transparent', border: '1px solid rgba(245,242,237,0.1)', color: couponChecking ? '#555' : '#888', fontFamily: 'Space Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.6rem 0.9rem', cursor: couponChecking ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap' }}>
+                          {couponChecking ? '...' : 'Apply'}
+                        </button>
+                      </div>
+                      {couponError && <p style={{ fontSize: '0.7rem', color: '#ff3c1e', marginTop: '0.5rem' }}>{couponError}</p>}
+                    </>
+                  )}
+                </div>
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginBottom: '1.2rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
                     <span style={{ color: '#888' }}>Subtotal ({totalItems} item{totalItems !== 1 ? 's' : ''})</span>
@@ -417,6 +509,12 @@ export default function CartPage() {
                     <span style={{ color: '#888' }}>Shipping</span>
                     <span style={{ color: shipping === 0 ? '#1aff9c' : '#f5f2ed' }}>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
                   </div>
+                  {discount > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                      <span style={{ color: '#1aff9c' }}>Coupon Discount</span>
+                      <span style={{ color: '#1aff9c' }}>−₹{discount}</span>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
                     <span style={{ color: '#888' }}>Taxes</span>
                     <span style={{ color: '#888' }}>Included</span>
@@ -426,14 +524,6 @@ export default function CartPage() {
                 <div style={{ borderTop: '1px solid rgba(245,242,237,0.1)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '1.5rem' }}>
                   <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#888' }}>Total</span>
                   <span style={{ fontFamily: 'Bebas Neue, serif', fontSize: '2.2rem', letterSpacing: '0.03em' }}>₹{total}</span>
-                </div>
-
-                {/* Coupon */}
-                <div style={{ marginBottom: '1.2rem' }}>
-                  <div style={{ display: 'flex', gap: 0 }}>
-                    <input type="text" placeholder="Coupon code (CHILL20)" style={{ flex: 1, background: '#111', border: '1px solid rgba(245,242,237,0.1)', borderRight: 'none', color: '#f5f2ed', fontFamily: 'DM Sans, sans-serif', fontSize: '0.8rem', padding: '0.6rem 0.8rem', outline: 'none' }} />
-                    <button style={{ background: 'transparent', border: '1px solid rgba(245,242,237,0.1)', color: '#888', fontFamily: 'Space Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.6rem 0.9rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>Apply</button>
-                  </div>
                 </div>
 
                 {/* Payment method selector */}

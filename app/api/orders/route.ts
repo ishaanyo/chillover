@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { createOrder, getOrdersByUserId } from '@/lib/orders';
 import { getStoreSettings } from '@/lib/settings';
+import { validateCoupon, redeemCoupon } from '@/lib/coupons';
 
 // GET /api/orders -> the logged-in customer's own orders
 export async function GET() {
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      items, subtotal, shippingFee, totalAmount, paymentId, paymentMethod,
+      items, subtotal, shippingFee, couponCode, paymentId, paymentMethod,
       shippingName, shippingPhone, shippingLine1, shippingLine2,
       shippingCity, shippingState, shippingPincode,
     } = body;
@@ -48,12 +49,31 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const safeSubtotal = Number(subtotal) || 0;
+    const safeShipping = Number(shippingFee) || 0;
+
+    // Never trust the client's discount figure — re-validate the coupon against the real subtotal
+    let discountAmount = 0;
+    let validatedCouponCode: string | undefined;
+    if (couponCode) {
+      const result = await validateCoupon(couponCode, safeSubtotal);
+      if (!result.valid) {
+        return NextResponse.json({ error: result.message ?? 'Coupon is no longer valid.' }, { status: 400 });
+      }
+      discountAmount = result.discount ?? 0;
+      validatedCouponCode = result.coupon?.code;
+    }
+
+    const totalAmount = Math.max(0, safeSubtotal + safeShipping - discountAmount);
+
     const order = await createOrder({
       userId: session.user.id,
       items,
-      subtotal: Number(subtotal) || 0,
-      shippingFee: Number(shippingFee) || 0,
-      totalAmount: Number(totalAmount) || 0,
+      subtotal: safeSubtotal,
+      shippingFee: safeShipping,
+      couponCode: validatedCouponCode,
+      discountAmount,
+      totalAmount,
       paymentMethod: method,
       paymentId,
       shippingName,
@@ -65,9 +85,14 @@ export async function POST(req: NextRequest) {
       shippingPincode,
     });
 
+    if (validatedCouponCode) {
+      await redeemCoupon(validatedCouponCode);
+    }
+
     return NextResponse.json({ order }, { status: 201 });
   } catch (err) {
     console.error('Create order error:', err);
     return NextResponse.json({ error: 'Failed to create order.' }, { status: 500 });
   }
 }
+

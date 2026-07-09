@@ -105,8 +105,37 @@ enum OrderStatus {
 }
 
 model StoreSettings {
-  id         String  @id @default("main")
-  codEnabled Boolean @default(true)
+  id                     String  @id @default("main")
+  codEnabled             Boolean @default(true)
+
+  // Delhivery shipping integration
+  delhiveryEnabled       Boolean @default(false)
+  delhiveryApiKey        String?
+  delhiveryClientName    String?
+  delhiveryPickupName    String?
+  delhiveryPickupAddress String?
+  delhiveryPickupCity    String?
+  delhiveryPickupPincode String?
+  delhiveryPickupPhone   String?
+}
+
+enum CouponType {
+  PERCENT
+  FLAT
+}
+
+model Coupon {
+  id            String     @id @default(cuid())
+  code          String     @unique
+  type          CouponType
+  value         Int
+  minOrderValue Int        @default(0)
+  maxDiscount   Int?
+  expiresAt     DateTime?
+  usageLimit    Int?
+  usedCount     Int        @default(0)
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
 }
 
 model Order {
@@ -116,6 +145,8 @@ model Order {
   items           OrderItem[]
   subtotal        Int
   shippingFee     Int         @default(0)
+  couponCode      String?
+  discountAmount  Int         @default(0)
   totalAmount     Int
   status          OrderStatus @default(PENDING)
   paymentMethod   String      @default("RAZORPAY")
@@ -127,6 +158,13 @@ model Order {
   shippingCity    String
   shippingState   String
   shippingPincode String
+
+  // Delhivery shipment tracking
+  waybill         String?
+  trackingUrl     String?
+  courierStatus   String?
+  shippedAt       DateTime?
+
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 }

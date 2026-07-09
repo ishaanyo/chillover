@@ -1,6 +1,7 @@
 import { getOrderById } from '@/lib/orders';
 import { notFound } from 'next/navigation';
 import AdminOrderStatusControl from '@/components/admin/AdminOrderStatusControl';
+import ShipmentControl from '@/components/admin/ShipmentControl';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -78,6 +79,17 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
           </div>
 
           <div style={{ background: '#1a1a1a', border: '1px solid rgba(245,242,237,0.07)', padding: '1.5rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem' }}>Shipment</h2>
+            <ShipmentControl
+              orderId={serialized.id}
+              waybill={serialized.waybill}
+              trackingUrl={serialized.trackingUrl}
+              courierStatus={serialized.courierStatus}
+              shippedAt={serialized.shippedAt}
+            />
+          </div>
+
+          <div style={{ background: '#1a1a1a', border: '1px solid rgba(245,242,237,0.07)', padding: '1.5rem' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem' }}>Summary</h2>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem' }}>
               <span>Subtotal</span><span>₹{serialized.subtotal}</span>
@@ -85,6 +97,11 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#888', marginBottom: '0.8rem' }}>
               <span>Shipping</span><span>{serialized.shippingFee === 0 ? 'FREE' : `₹${serialized.shippingFee}`}</span>
             </div>
+            {serialized.discountAmount > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#1aff9c', marginBottom: '0.8rem' }}>
+                <span>Coupon ({serialized.couponCode})</span><span>−₹{serialized.discountAmount}</span>
+              </div>
+            )}
             <div style={{ borderTop: '1px solid rgba(245,242,237,0.1)', paddingTop: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontFamily: 'Space Mono, monospace', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#888' }}>Total</span>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem' }}>₹{serialized.totalAmount}</span>

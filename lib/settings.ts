@@ -16,3 +16,22 @@ export async function updateCodEnabled(enabled: boolean) {
     create: { id: 'main', codEnabled: enabled },
   });
 }
+
+interface DelhiveryConfigInput {
+  delhiveryEnabled: boolean;
+  delhiveryApiKey?: string | null;
+  delhiveryClientName?: string | null;
+  delhiveryPickupName?: string | null;
+  delhiveryPickupAddress?: string | null;
+  delhiveryPickupCity?: string | null;
+  delhiveryPickupPincode?: string | null;
+  delhiveryPickupPhone?: string | null;
+}
+
+export async function updateDelhiveryConfig(data: DelhiveryConfigInput) {
+  return prisma.storeSettings.upsert({
+    where: { id: 'main' },
+    update: data,
+    create: { id: 'main', codEnabled: true, ...data },
+  });
+}

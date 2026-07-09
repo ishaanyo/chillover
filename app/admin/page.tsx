@@ -52,6 +52,9 @@ export default async function AdminPage() {
         <Link href="/admin/orders" style={{ background: 'transparent', color: '#e8e2d9', fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.8rem 1.8rem', textDecoration: 'none', border: '1px solid rgba(245,242,237,0.2)', display: 'inline-block' }}>
           Manage Orders
         </Link>
+        <Link href="/admin/coupons" style={{ background: 'transparent', color: '#e8e2d9', fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.8rem 1.8rem', textDecoration: 'none', border: '1px solid rgba(245,242,237,0.2)', display: 'inline-block' }}>
+          Manage Coupons
+        </Link>
         <Link href="/admin/subcategories" style={{ background: 'transparent', color: '#e8e2d9', fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.8rem 1.8rem', textDecoration: 'none', border: '1px solid rgba(245,242,237,0.2)', display: 'inline-block' }}>
           Manage Subcategories
         </Link>

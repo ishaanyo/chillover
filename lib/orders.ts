@@ -15,6 +15,8 @@ interface CreateOrderInput {
   items: OrderItemInput[];
   subtotal: number;
   shippingFee: number;
+  couponCode?: string;
+  discountAmount?: number;
   totalAmount: number;
   paymentMethod: 'RAZORPAY' | 'COD';
   paymentId?: string;
