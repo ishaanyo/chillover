@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div style={{ paddingTop: '5rem', minHeight: '100vh', background: '#0a0a0a' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0a' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 2rem' }}>
         {/* Header skeleton */}
         <div style={{ marginBottom: '2.5rem' }}>

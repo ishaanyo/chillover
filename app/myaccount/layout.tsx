@@ -17,11 +17,11 @@ export default async function MyAccountLayout({ children }: { children: React.Re
   ];
 
   return (
-    <div style={{ paddingTop: '5rem', minHeight: '100vh', background: '#0a0a0a' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0a' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2.5rem 2rem', display: 'grid', gridTemplateColumns: '250px 1fr', gap: '2rem', alignItems: 'flex-start' }}>
 
         {/* Sidebar */}
-        <div style={{ background: '#1a1a1a', border: '1px solid rgba(245,242,237,0.07)', position: 'sticky', top: '5.5rem' }}>
+        <div style={{ background: '#1a1a1a', border: '1px solid rgba(245,242,237,0.07)', position: 'sticky', top: '0.5rem' }}>
           <div style={{ padding: '1.2rem 1.3rem', borderBottom: '1px solid rgba(245,242,237,0.07)' }}>
             <p style={{ fontSize: '0.9rem', fontWeight: 500 }}>{session.user.name}</p>
             <p style={{ fontSize: '0.72rem', color: '#888', marginTop: '0.2rem' }}>{session.user.email}</p>
@@ -51,7 +51,7 @@ export default async function MyAccountLayout({ children }: { children: React.Re
       <style>{`
         @media (max-width: 768px) {
           div[style*="grid-template-columns: 250px 1fr"] { grid-template-columns: 1fr !important; }
-          div[style*="position: sticky"][style*="top: 5.5rem"] { position: static !important; }
+          div[style*="position: sticky"][style*="top: 0.5rem"] { position: static !important; }
         }
       `}</style>
     </div>

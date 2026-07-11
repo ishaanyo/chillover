@@ -269,7 +269,7 @@ export default function CartPage() {
   };
 
   return (
-    <div style={{ paddingTop: '5rem', minHeight: '100vh', background: '#0a0a0a' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0a' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '3rem 2rem' }}>
         {/* Header */}
         <div style={{ marginBottom: '2.5rem' }}>
@@ -466,7 +466,7 @@ export default function CartPage() {
             </div>
 
             {/* Order summary sidebar */}
-            <div style={{ position: 'sticky', top: '5.5rem' }}>
+            <div style={{ position: 'sticky', top: '0.5rem' }}>
               <div style={{ background: '#1a1a1a', border: '1px solid rgba(245,242,237,0.07)', padding: '1.5rem' }}>
                 <h2 style={{ fontFamily: 'Bebas Neue, serif', fontSize: '1.8rem', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>Order Summary</h2>
 

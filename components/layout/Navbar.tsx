@@ -60,8 +60,8 @@ export default function Navbar() {
   return (
     <>
       <nav style={{
-        position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 100,
-        background: scrolled ? 'rgba(10,10,10,0.94)' : 'rgba(10,10,10,0.3)',
+        position: 'sticky', top: 0, left: 0, width: '100%', zIndex: 100,
+        background: scrolled ? 'rgba(10,10,10,0.97)' : 'rgba(10,10,10,0.85)',
         backdropFilter: 'blur(14px)',
         borderBottom: scrolled ? '1px solid rgba(245,242,237,0.08)' : '1px solid transparent',
         transition: 'background 0.3s, border-color 0.3s, padding 0.3s',

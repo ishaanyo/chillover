@@ -6,7 +6,7 @@ import ProductCard from '@/components/product/ProductCard';
 import type { Product } from '@/types';
 
 export default function WishlistPage() {
-  const { items } = useWishlist();
+  const { items, toggle } = useWishlist();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -25,13 +25,23 @@ export default function WishlistPage() {
     setLoading(true);
     fetch(`/api/products?ids=${items.join(',')}`)
       .then(res => res.json())
-      .then(data => setProducts(data.products ?? []))
+      .then(data => {
+        const found: Product[] = data.products ?? [];
+        setProducts(found);
+
+        // Clean up stale ids (e.g. a deleted product) so the badge count stays accurate
+        const foundIds = new Set(found.map(p => p.id));
+        items.forEach(id => { if (!foundIds.has(id)) toggle(id); });
+      })
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, mounted]);
 
+  const displayCount = mounted && !loading ? products.length : items.length;
+
   return (
-    <div style={{ paddingTop: '5rem', minHeight: '100vh', background: '#0a0a0a' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0a' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 2rem' }}>
         {/* Header */}
         <div style={{ marginBottom: '2.5rem' }}>
@@ -39,7 +49,7 @@ export default function WishlistPage() {
             <Link href="/" style={{ color: '#888', textDecoration: 'none' }}>Home</Link> › Wishlist
           </p>
           <h1 style={{ fontFamily: 'Bebas Neue, serif', fontSize: 'clamp(2.5rem,6vw,4.5rem)', letterSpacing: '0.03em', textTransform: 'uppercase', lineHeight: 1 }}>
-            My Wishlist {mounted && items.length > 0 && <span style={{ color: '#ff3c1e' }}>({items.length})</span>}
+            My Wishlist {mounted && displayCount > 0 && <span style={{ color: '#ff3c1e' }}>({displayCount})</span>}
           </h1>
         </div>
 

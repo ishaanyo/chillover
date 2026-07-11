@@ -73,7 +73,7 @@ export default async function SlugPage({
   const womenCount = (await getProductsByCategory('women')).length;
 
   return (
-    <div style={{ paddingTop: '5rem', minHeight: '100vh', background: '#0a0a0a' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0a' }}>
 
       {/* Page header */}
       <div style={{ background: '#1a1a1a', padding: '2.5rem 2.5rem 2rem', borderBottom: '1px solid rgba(245,242,237,0.07)' }}>

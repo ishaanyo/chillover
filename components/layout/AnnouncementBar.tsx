@@ -62,8 +62,9 @@ export default function AnnouncementBar() {
     <div style={{
       background: '#1a1a1a',
       borderBottom: '1px solid rgba(245,242,237,0.07)',
-      position: 'relative',
-      zIndex: 101,
+      position: 'sticky',
+      top: 0,
+      zIndex: 102,
       overflow: 'hidden',
       height: '34px',
       display: 'flex',
